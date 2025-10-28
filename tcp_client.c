@@ -57,11 +57,20 @@ int main (int argc, char *argv[])
     // Loop to continuously communicate to receive from server
     while (1) {
 
-        // Receive the server's response:
-        if(recv(socket_desc, (void *)&the_message, sizeof(the_message), 0) < 0){
+        //store return value to determine if program craashed or server terminated succfully
+        int byte = recv(socket_desc, (void *)&the_message, sizeof(the_message), 0);
+        // Receive the server's response: 
+        if( byte < 0){
             printf("Error while receiving server's msg\n");
             return -1;
         }
+
+        if (byte == 0) {
+            printf("Server terminated gracefully");
+            break;
+        }
+
+        
 
         printf("--------------------------------------------------------\n");
         printf("Updated temperature sent by the Central process = %f\n", the_message.T);

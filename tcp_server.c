@@ -76,6 +76,8 @@ int * establishConnectionsFromExternalProcesses()
             exit(0);
         }
 
+         
+
         printf("One external process connected at IP: %s and port: %i\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 
         externalCount++; 
