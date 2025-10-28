@@ -44,26 +44,29 @@ int main (int argc, char *argv[])
     }
     printf("Connected with server successfully\n");
     printf("--------------------------------------------------------\n\n");
+
+     // Package to the sent to server
+        the_message = prepare_message(externalIndex, initialTemperature);
+
+        // Send the message to server:
+        if(send(socket_desc, (const void *)&the_message, sizeof(the_message), 0) < 0){
+            printf("Unable to send message\n");
+            return -1;
+        }
        
-    // Package to the sent to server 
-    the_message = prepare_message(externalIndex, initialTemperature); 
+    // Loop to continuously communicate to receive from server
+    while (1) {
 
-    // Send the message to server:
-    if(send(socket_desc, (const void *)&the_message, sizeof(the_message), 0) < 0){
-        printf("Unable to send message\n");
-        return -1;
-    }
- 
+        // Receive the server's response:
+        if(recv(socket_desc, (void *)&the_message, sizeof(the_message), 0) < 0){
+            printf("Error while receiving server's msg\n");
+            return -1;
+        }
 
-    // Receive the server's response:
-    if(recv(socket_desc, (void *)&the_message, sizeof(the_message), 0) < 0){
-        printf("Error while receiving server's msg\n");
-        return -1;
+        printf("--------------------------------------------------------\n");
+        printf("Updated temperature sent by the Central process = %f\n", the_message.T);
     }
-    
-    printf("--------------------------------------------------------\n");
-    printf("Updated temperature sent by the Central process = %f\n", the_message.T);
-    
+
     // Close the socket:
     close(socket_desc);
     
