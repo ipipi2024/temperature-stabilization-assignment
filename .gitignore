@@ -1,0 +1,13 @@
+# Ignore all object and binary files
+*.o
+*.out
+*.exe
+
+# Ignore dependency and build folders
+/build/
+/bin/
+/obj/
+
+#excutables specifics without extensions
+server
+client
