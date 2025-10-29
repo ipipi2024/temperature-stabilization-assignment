@@ -1,4 +1,204 @@
-# Temperature stabilization using inter-process communication
+# Temperature Stabilization Using Inter-Process Communication
+
+## Implementation Summary
+
+This project implements a distributed temperature-stabilization system using TCP sockets for inter-process communication. The system consists of 5 processes: one central server and four external client processes that iteratively exchange temperature data until the system reaches thermal equilibrium.
+
+### Features Implemented
+
+- **Multi-process architecture**: 1 central server + 4 external clients
+- **Persistent TCP socket connections**: All clients maintain continuous connections with the server
+- **Iterative temperature updates**: Both central and external processes update their temperatures each iteration
+- **Convergence detection**: System detects stability when all temperatures change by less than 0.001 between iterations
+- **Graceful termination**: Server broadcasts termination signals to all clients upon convergence
+
+### Temperature Update Formulas
+
+**External Process Formula:**
+```
+externalTemp = (3 × externalTemp + 2 × centralTemp) / 5
+```
+
+**Central Process Formula:**
+```
+centralTemp = (2 × centralTemp + ΣexternalTemp) / 6
+```
+
+### Convergence Criterion
+
+The system is considered stabilized when all four external process temperatures change by less than `EPS = 1e-3` (0.001) between consecutive iterations.
+
+---
+
+## Compilation Instructions
+
+Compile the server and client programs using gcc:
+
+```bash
+gcc utils.c tcp_server.c -o server
+gcc utils.c tcp_client.c -o client
+```
+
+---
+
+## Running the Program
+
+### Step 1: Start the Central Server
+
+Open a terminal and run the server with an initial temperature:
+
+```bash
+./server <initial_temperature>
+```
+
+**Example:**
+```bash
+./server 0
+```
+
+The server will start listening on port 2000 and wait for 4 external clients to connect.
+
+### Step 2: Start the External Clients
+
+Open four separate terminals and run each client with its unique index (1-4) and initial temperature:
+
+```bash
+./client <client_index> <initial_temperature>
+```
+
+**Example:**
+```bash
+./client 1 100
+./client 2 200
+./client 3 300
+./client 4 400
+```
+
+### Expected Behavior
+
+1. Server starts and listens for connections
+2. Each client connects and sends its initial temperature
+3. Server calculates new central temperature and broadcasts to all clients
+4. Clients receive central temperature and calculate their updated temperatures
+5. Process repeats until convergence (all temperatures stabilize)
+6. Server detects convergence and broadcasts termination signal
+7. All processes print final temperatures and exit
+
+---
+
+## Execution Screenshots
+
+The following screenshots demonstrate the program execution with various initial temperature configurations:
+
+### Test Run 1: Initial Temperatures (0, 100, 200, 300, 400)
+This run shows the system starting with the server at 0°C and clients at 100°C, 200°C, 300°C, and 400°C. The system converges after approximately 24 iterations to a final temperature of ~208.33°C.
+
+![Test Run 1 - Initial Setup](screenshot1.png)
+
+![Test Run 1 - Convergence](screenshot2.png)
+
+### Test Run 2: Initial Temperatures (10, 100, 200, 300, 400)
+Another test with the same initial values but initial server temperature at 10, demonstrating consistent convergence to ~210.0°C.
+
+![Test Run 2 - Execution](screenshot3.png)
+![Test Run 2 - Convergence](screenshot4.png)
+
+### Test Run 4: Extreme Values (0, 1000, 4, 10, -100)
+This test demonstrates the system's ability to stabilize even with extreme initial temperature differences, including negative values. The system converges to ~190.42°C.
+
+![Test Run 4 - Extreme Values](screenshot5.png)
+
+![Test Run 4 - Final Convergence](screenshot6.png)
+
+---
+
+## Algorithm Explanation
+
+### Server Algorithm (tcp_server.c)
+
+1. **Initialization**:
+   - Create listening socket on port 2000
+   - Accept connections from exactly 4 external clients
+   - Parse initial central temperature from command line
+
+2. **Iteration Loop**:
+   - Receive updated temperatures from all 4 clients
+   - Calculate new central temperature using the formula
+   - Broadcast updated central temperature to all clients
+   - Check convergence by comparing current temperatures with previous iteration
+   - If converged, send termination signal (Index = -1) and exit
+
+3. **Convergence Check**:
+   - System is stable when `|temperature[i] - prevTemperature[i]| < EPS` for all i
+   - EPS = 0.001 (defined constant)
+
+### Client Algorithm (tcp_client.c)
+
+1. **Initialization**:
+   - Parse client index and initial temperature from command line
+   - Connect to server at 127.0.0.1:2000
+   - Send initial temperature to server
+
+2. **Iteration Loop**:
+   - Receive central temperature from server
+   - Check for termination signal (Index == -1)
+   - If not terminated, calculate new external temperature using formula
+   - Send updated temperature back to server
+   - Repeat until termination signal received
+
+3. **Termination**:
+   - Upon receiving termination signal, print final temperature and exit
+
+---
+
+## Project Structure
+
+```
+temperature-stabilization-assignment/
+├── tcp_server.c         # Central server implementation
+├── tcp_client.c         # External client implementation
+├── utils.h              # Header file with message structure
+├── utils.c              # Utility functions
+├── README.md            # This file
+├── screenshot1.png      # Execution screenshots
+├── screenshot2.png
+├── screenshot3.png
+├── screenshot4.png
+├── screenshot5.png
+└── screenshot6.png
+```
+
+---
+
+## Technical Details
+
+### Message Structure
+
+Communication between processes uses a C struct:
+
+```c
+struct msg {
+    float T;      // Temperature value
+    int Index;    // Process identifier (-1 for termination signal)
+};
+```
+
+### Network Configuration
+
+- **Protocol**: TCP (SOCK_STREAM)
+- **IP Address**: 127.0.0.1 (localhost)
+- **Port**: 2000
+- **Connections**: Persistent (maintained throughout execution)
+
+### Convergence Threshold
+
+- **EPS**: 1e-3 (0.001)
+- Ensures temperatures stabilize within 0.1% precision
+
+---
+
+
+# Original Assignment Instructions
 
 ### :warning: This is a Linux/Unix OS assignment. It is not an OS/161 Assignment
 
