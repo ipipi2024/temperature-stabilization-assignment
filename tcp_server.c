@@ -178,13 +178,26 @@ int main(int argc, char *argv[])
         if (stable) {
             printf("========================================\n");
             printf("SYSTEM HAS STABILIZED!\n");
+            printf("Final central temperature: %f\n", centralTemp);
             printf("========================================\n");
+
+            // Send termination signal to all clients
+            // Use Index = -1 as the "done" signal
+            struct msg done_msg;
+            done_msg.T = centralTemp;
+            done_msg.Index = -1;  // -1 indicates termination
+
+            for (int i = 0; i < numExternals; i++) {
+                if (send(client_socket[i], (const void *)&done_msg, sizeof(done_msg), 0) < 0) {
+                    printf("Can't send termination signal to client %d\n", i);
+                }
+            }
         }
 
         // Update previous temperatures for next iteration
         for (int i = 0; i < numExternals; i++) {
             prevTemperature[i] = temperature[i];
-        } 
+        }
 
     }
  
