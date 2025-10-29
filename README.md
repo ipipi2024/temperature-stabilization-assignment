@@ -103,12 +103,12 @@ Another test with the same initial values but initial server temperature at 10, 
 ![Test Run 2 - Execution](screenshot3.png)
 ![Test Run 2 - Convergence](screenshot4.png)
 
-### Test Run 4: Extreme Values (0, 1000, 4, 10, -100)
+### Test Run 3: Extreme Values (0, 1000, 4, 10, -100)
 This test demonstrates the system's ability to stabilize even with extreme initial temperature differences, including negative values. The system converges to ~190.42°C.
 
-![Test Run 4 - Extreme Values](screenshot5.png)
+![Test Run 3 - Extreme Values](screenshot5.png)
 
-![Test Run 4 - Final Convergence](screenshot6.png)
+![Test Run 3 - Final Convergence](screenshot6.png)
 
 ---
 
