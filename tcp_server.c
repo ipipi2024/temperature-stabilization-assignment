@@ -130,14 +130,19 @@ int main(int argc, char *argv[])
 
         }
 
-        // Modify Temperature 
-        float updatedTemp = temperature[0] + temperature[1] + temperature[2] + temperature[3];
-        updatedTemp += updatedTemp / 4.0;  
+        // Store old central temperature (for convergence checking later)
+        float oldCentralTemp = centralTemp;
 
+        // Calculate new central temperature using correct formula
+        // Formula: centralTemp = (2 * centralTemp + T1 + T2 + T3 + T4) / 6
+        float sumOfExternalTemps = temperature[0] + temperature[1] + temperature[2] + temperature[3];
+        centralTemp = (2 * centralTemp + sumOfExternalTemps) / 6.0;
+
+        printf("Central temperature updated to: %f\n", centralTemp);
 
         // Construct message with updated temperature
-        struct msg updated_msg; 
-        updated_msg.T = updatedTemp;
+        struct msg updated_msg;
+        updated_msg.T = centralTemp;
         updated_msg.Index = 0;                // Index of central server 
 
 
@@ -151,8 +156,8 @@ int main(int argc, char *argv[])
 
         printf("\n");
 
-        // Check stability condition 
-        if (updatedTemp == 0)
+        // Check stability condition (will be fixed in Step 2)
+        if (centralTemp == 0)
             stable = true; 
 
     }
