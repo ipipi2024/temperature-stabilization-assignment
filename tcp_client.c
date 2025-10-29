@@ -57,7 +57,7 @@ int main (int argc, char *argv[])
     // Loop to continuously communicate to receive from server
     while (1) {
 
-        //store return value to determine if program craashed or server terminated succfully
+        //store return value to determine if program crashed or server terminated succfully
         int byte = recv(socket_desc, (void *)&the_message, sizeof(the_message), 0);
         // Receive the server's response: 
         if( byte < 0){
@@ -66,7 +66,7 @@ int main (int argc, char *argv[])
         }
 
         if (byte == 0) {
-            printf("Server terminated gracefully");
+            printf("Server terminated gracefully\n");
             break;
         }
 
