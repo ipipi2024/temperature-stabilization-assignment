@@ -2,14 +2,16 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <sys/types.h> 
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <stdbool.h>
+#include <math.h>
 #include "utils.h"
 
 
-#define numExternals 4     // Number of external processes 
+#define numExternals 4     // Number of external processes
+#define EPS 1e-3           // Convergence threshold (epsilon) 
 
 
 int * establishConnectionsFromExternalProcesses()
@@ -104,16 +106,22 @@ int main(int argc, char *argv[])
     struct msg messageFromClient;   
     
 
-    // Establish client connections and return 
-    // an array of file descriptors of client sockets. 
-    int * client_socket = establishConnectionsFromExternalProcesses(); 
+    // Establish client connections and return
+    // an array of file descriptors of client sockets.
+    int * client_socket = establishConnectionsFromExternalProcesses();
 
+    // Array to store previous temperatures from clients (for convergence checking)
+    float prevTemperature[numExternals];
 
+    // Initialize previous temperatures to very different values (first iteration will not converge)
+    for (int i = 0; i < numExternals; i++) {
+        prevTemperature[i] = -999.0;
+    }
 
     int stable = false;
     while ( !stable ){
 
-        // Array that stores temperatures from clients 
+        // Array that stores temperatures from clients
         float temperature[numExternals];
 
         // Receive the messages from the 4 external processes 
@@ -156,9 +164,27 @@ int main(int argc, char *argv[])
 
         printf("\n");
 
-        // Check stability condition (will be fixed in Step 2)
-        if (centralTemp == 0)
-            stable = true; 
+        // Check convergence: system is stable when ALL 4 external temperatures
+        // have changed less than EPS between iterations
+        stable = true;  // Assume stable, check all clients
+        for (int i = 0; i < numExternals; i++) {
+            float temperatureChange = fabs(temperature[i] - prevTemperature[i]);
+            if (temperatureChange >= EPS) {
+                stable = false;  // At least one client hasn't converged
+                break;
+            }
+        }
+
+        if (stable) {
+            printf("========================================\n");
+            printf("SYSTEM HAS STABILIZED!\n");
+            printf("========================================\n");
+        }
+
+        // Update previous temperatures for next iteration
+        for (int i = 0; i < numExternals; i++) {
+            prevTemperature[i] = temperature[i];
+        } 
 
     }
  
