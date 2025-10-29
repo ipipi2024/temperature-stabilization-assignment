@@ -11,3 +11,10 @@
 #excutables specifics without extensions
 server
 client
+
+#design and documentation files
+system-design.md
+breakdown.md
+todo.md
+useful-commands.md
+

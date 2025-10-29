@@ -91,13 +91,16 @@ int * establishConnectionsFromExternalProcesses()
 
 
 
-int main(void)
+int main(int argc, char *argv[])
 {
-    int socket_desc; 
+    int socket_desc;
    // unsigned int client_size;
    // struct sockaddr_in server_addr, client_addr;
 
-    // Messages received from clients (externals). 
+    // Parse initial temperature from command line
+    float centralTemp = atof(argv[1]);
+
+    // Messages received from clients (externals).
     struct msg messageFromClient;   
     
 
